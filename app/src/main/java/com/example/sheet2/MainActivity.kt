@@ -53,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -75,49 +76,27 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-
-@Composable
 fun TutorialBottomSheetScreen() {
     var showBottomSheetScaffold by rememberSaveable { mutableStateOf(false) }
     val showModalBottomSheet = rememberSaveable { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Button(onClick = {
-            showBottomSheetScaffold = !showBottomSheetScaffold
-        }) {
-            Text(text = "Show/Hide BottomSheetScaffold")
-        }
-        Button(onClick = {
-            showModalBottomSheet.value = !showModalBottomSheet.value
-        }) {
-            Text(text = "Show/Hide ModalBottomSheet")
-        }
-    }
-
-if (showBottomSheetScaffold) TutorialModalBottomSheet(showModalBottomSheet)
+    TutorialBottomSheetScaffold()
 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TutorialBottomSheetScaffold() {
+    
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
 
+    var height by remember { mutableStateOf(0) }
+
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
-        sheetPeekHeight = 340.dp,
+        sheetPeekHeight = height.dp,
+        sheetSwipeEnabled = false,
         sheetContent = {
             Row(
                 modifier = Modifier.padding(8.dp),
@@ -126,72 +105,31 @@ fun TutorialBottomSheetScaffold() {
                 Icon(Icons.Default.Share, contentDescription = "Share")
                 Text(text = "Share")
             }
-
-            Button(onClick = { scope.launch { scaffoldState.bottomSheetState.expand() } }) {
-                Text(text = "Expand BottomSheet")
-            }
-            Button(onClick = { scope.launch { scaffoldState.bottomSheetState.partialExpand() } }) {
-                Text(text = "PartialExpand BottomSheet")
-            }
         },
         content = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = Color.Black.copy(alpha = 0.4f) )
-            )
-//            Text(
-//                text = "Android",
-//                modifier = Modifier
-//                    .background(color = Color.Green)
-//                    .padding(8.dp)
-//            )
-        }
-    )
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TutorialModalBottomSheet(showModalBottomSheet: MutableState<Boolean>) {
-    val scope = rememberCoroutineScope()
-    var skipPartially by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartially)
-
-    if (showModalBottomSheet.value)
-        ModalBottomSheet(
-            onDismissRequest = { showModalBottomSheet.value = false },
-            sheetState = bottomSheetState,
-        ) {
-            Column(Modifier.fillMaxSize()) {
-                Button(
-                    onClick = {
-                        scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                            if (!bottomSheetState.isVisible) {
-                                showModalBottomSheet.value = false
-                            }
-                        }
-                    }
-                ) {
-                    Text("Hide Bottom Sheet")
-                }
+            Column(
+                modifier = Modifier.fillMaxSize()
+                    .zIndex(3f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Button(onClick = {
-                    scope.launch {
-                        showModalBottomSheet.value = false
-                        skipPartially = !skipPartially
-                        delay(500L)
-                        showModalBottomSheet.value = true
+                    if (height == 260) {
+                        height =  0
+                    } else {
+                        height =  260
                     }
                 }) {
-                    Text(text = "Skip Partially Expanded")
+                    Text(text = "Show/Hide BottomSheetScaffold")
                 }
             }
+            Text(text = "aaa",
+                modifier = Modifier
+                    .zIndex(1f)
+                    .fillMaxSize()
+                    .background(color = Color.Blue.copy(alpha = 0.5f) )
+            )
         }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Sheet2Theme {
-        Greeting("Android")
-    }
+    )
 }
